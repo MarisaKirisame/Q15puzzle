@@ -48,3 +48,20 @@ void MainWindow::on_pushButton_3_clicked()
     p_impl->p = p_impl->mo.apply_macro( p_impl->p, act.begin( ), act.end( ) );
     repaint( );
 }
+
+void MainWindow::on_pushButton_4_clicked()
+{
+    std::vector< std::vector< Action > > res;
+    p_impl->mo.solve( p_impl->p, std::back_inserter( res ) );
+    auto it = std::find_if_not( res.begin(), res.end(), []( const auto& t ){ return t.empty(); });
+    if ( it != res.end() ) {
+        p_impl->p = p_impl->mo.apply_macro( p_impl->p, it->begin( ), it->end( ) );
+        repaint();
+    }
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    p_impl->p =  random_puzzle();
+    repaint();
+}
