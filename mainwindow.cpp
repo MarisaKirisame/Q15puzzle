@@ -2,6 +2,7 @@
 #include "puzzle.hpp"
 #include "../MO/mo.hpp"
 #include "../cpp_common/combinator.hpp"
+#include <chrono>
 using namespace MO;
 auto iddfs_learner =
         []( const puzzle & state, size_t i, const auto & change_to )
@@ -24,10 +25,10 @@ auto iddfs_learner =
         };//THIS WILL NOT WORK ON YOUR MACHINE! IT STILL EXISTS BECAUSE I WANT TO ABSTRACT MORE FROM IT, JUST DONT USE!
 template< typename ACTION, typename STATE_VAR, size_t NUM_VAR, typename ALL_ACTION, typename ACT_FUNC, typename INVERSE_FUNC >
 boost::optional< std::vector< ACTION > > PARTIAL_MATCH(
-        const array< STATE_VAR, NUM_VAR > & st, size_t i, const STATE_VAR & change_to,
+        const array< STATE_VAR, NUM_VAR > & st, const array< size_t, NUM_VAR > & orientation, size_t i, const STATE_VAR & change_to,
         ALL_ACTION all_action, ACT_FUNC act_func, INVERSE_FUNC inverse_func, size_t depth )
 {
-    size_t l = depth / 2, r = depth / 2 + depth % 2;
+    size_t l = depth / 2 + depth % 2, r = depth / 2;
     auto powerset = common::fix(
         [&]( const auto & SELF, size_t i )
         {
@@ -59,20 +60,29 @@ boost::optional< std::vector< ACTION > > PARTIAL_MATCH(
             [&]( const array< STATE_VAR, NUM_VAR > & arr )
             {
                 std::vector< STATE_VAR > ret;
-                copy_n( arr.begin( ), i, back_inserter( ret ) );
+                copy_n( boost::make_transform_iterator(
+                            boost::make_counting_iterator( 0 ), [&]( size_t s ){ return arr[ orientation[ s ] ]; } ),
+                        i,
+                        back_inserter( ret ) );
                 return ret;
             };
     for ( const auto & e : psl )
-    { change_invarance_l.insert( { invariance_state( e.first ), e.second } ); }
+    {
+        if ( adjacent_find( e.second.begin( ), e.second.end( ), [&]( ACTION l, ACTION r ){ return l == inverse_func( r ); } ) == e.second.end( ) )
+        { change_invarance_l.insert( { invariance_state( e.first ), e.second } ); }
+    }
     for ( const auto & e : psr )
-    { change_invarance_r.insert( { invariance_state( e.first ), e.second } ); }
+    {
+        if ( adjacent_find( e.second.begin( ), e.second.end( ), [&]( ACTION l, ACTION r ){ return l == inverse_func( r ); } ) == e.second.end( ) )
+        { change_invarance_r.insert( { invariance_state( e.first ), e.second } ); }
+    }
     for ( const auto & el : change_invarance_l )
     {
         auto r = change_invarance_r.equal_range( el.first );
         for ( const auto & er : common::make_range_container_proxy( r.first, r.second ) )
         {
             vector< Action > action1 = el.second, action2 = er.second;
-            for ( bool b = true; b; b = ! b )
+            for ( int ii = 0; ii < 2; ++ii )
             {
                 auto new_state =
                         accumulate(
@@ -83,7 +93,7 @@ boost::optional< std::vector< ACTION > > PARTIAL_MATCH(
                                         st,
                                         act_func ),
                             act_func );
-                if ( new_state[i] == change_to && invariance_state( new_state ) == invariance_state( st ) )
+                if ( new_state[ orientation[i] ] == change_to && invariance_state( new_state ) == invariance_state( st ) )
                 {
                     action1.reserve( action1.size( ) + action2.size( ) );
                     copy( boost::make_transform_iterator( action2.rbegin( ), inverse_func ),
@@ -99,12 +109,13 @@ boost::optional< std::vector< ACTION > > PARTIAL_MATCH(
 }
 auto lambda_all_action = []( const puzzle & p, auto out ) { return all_action( p, out ); };
 auto learner =
-        []( const puzzle & state, size_t i, const auto & change_to )
+        []( const puzzle & state, const array< size_t, 16 > & orientation, size_t i, const auto & change_to )
         {
             for (size_t depth = 0; true; ++depth)
             {
                 auto res = PARTIAL_MATCH< Action >(
                             state,
+                            orientation,
                             i,
                             change_to,
                             lambda_all_action,
@@ -125,7 +136,7 @@ auto lambda_act = []( const puzzle & p, Action a ) { return act( p, a ); };
 struct impl
 {
     MO< size_t, 16, Action, decltype( lambda_all_action ), decltype( lambda_act ), decltype( learner ) > mo =
-            make_MO< Action >( goal_state, lambda_all_action, lambda_act, learner );
+            make_MO< Action >( goal_state, { { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 } }, lambda_all_action, lambda_act, learner );
     puzzle p;
     explicit impl( const puzzle & p ) : p( p ) { }
 };
@@ -133,7 +144,7 @@ MainWindow::~MainWindow( ) { delete ui; delete p_impl; }
 MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), p_impl( new impl( random_puzzle( ) ) ), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-#define MACRO( NUM ) ui->Num ## NUM ->num = &p_impl->p[NUM]
+#define MACRO( NUM ) ui->Num ## NUM ->arr = & p_impl->p; ui->Num ## NUM ->pos = NUM;
     MACRO( 0 ); MACRO( 1 ); MACRO( 2 ); MACRO( 3 );
     MACRO( 4 ); MACRO( 5 ); MACRO( 6 ); MACRO( 7 );
     MACRO( 8 ); MACRO( 9 ); MACRO( 10 ); MACRO( 11 );
