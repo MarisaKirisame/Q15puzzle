@@ -52,22 +52,35 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), p_impl( new imp
     MACRO( 12 ); MACRO( 13 ); MACRO( 14 ); MACRO( 15 );
 }
 
+string vector_to_string(std::vector<Action> v) {
+    string ret = "";
+    for (auto i : v) {
+        switch (i) {
+            case Action::up : ret += "up\n";
+            case Action::down : ret += "down\n";
+            case Action::left : ret += "left\n";
+            default : ret += "right\n";
+        }
+    }
+    return ret;
+}
+
 void MainWindow::on_pushButton_3_clicked()
 {
     std::vector< std::vector< Action > > res;
     p_impl->mo.solve( p_impl->p, std::back_inserter( res ) );
     std::vector< Action > act;
     flatten( res.begin( ), res.end( ), std::back_inserter( act ) );
-    p_impl->p = p_impl->mo.apply_macro( p_impl->p, act.begin( ), act.end( ) );
-    repaint( );
+
+    QMessageBox::about( this, tr("test"), tr(vector_to_string(act).c_str()));
 }
 
 void MainWindow::on_pushButton_4_clicked()
 {
     std::vector< Action > res;
     p_impl->mo.solve_step( p_impl->p, std::back_inserter( res ) );
-    p_impl->p = p_impl->mo.apply_macro( p_impl->p, res.begin( ), res.end( ) );
-    repaint();
+
+    QMessageBox::about( this, tr("test"), tr(vector_to_string(res).c_str()));
 }
 
 void MainWindow::on_pushButton_clicked()
