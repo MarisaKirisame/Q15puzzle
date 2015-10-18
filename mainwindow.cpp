@@ -5,6 +5,7 @@
 #include <chrono>
 #include <QKeyEvent>
 #include <QInputDialog>
+#include <QMessageBox>
 
 using namespace MO;
 auto lambda_all_action = []( const puzzle & p, auto out ) { return all_action( p, out ); };
@@ -110,4 +111,9 @@ void MainWindow::on_pushButton_5_clicked()
         p_impl->p = swapTwo(p_impl->p, x, y);
         repaint();
     }
+}
+
+void MainWindow::on_pushButton_2_clicked()
+{
+    QMessageBox::about( this, tr("test"), tr(std::to_string(p_impl->mo.table.size()).c_str()));
 }
