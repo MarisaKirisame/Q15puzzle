@@ -71,8 +71,6 @@ void MainWindow::on_pushButton_3_clicked()
     p_impl->mo.solve( p_impl->p, std::back_inserter( res ) );
     std::vector< Action > act;
     flatten( res.begin( ), res.end( ), std::back_inserter( act ) );
-    p_impl->p = p_impl->mo.apply_macro( p_impl->p, act.begin( ), act.end( ) );
-    repaint( );
 
     QMessageBox::about( this, tr("test"), tr(vector_to_string(act).c_str()));
 }
@@ -81,8 +79,6 @@ void MainWindow::on_pushButton_4_clicked()
 {
     std::vector< Action > res;
     p_impl->mo.solve_step( p_impl->p, std::back_inserter( res ) );
-    p_impl->p = p_impl->mo.apply_macro( p_impl->p, res.begin( ), res.end( ) );
-    repaint();
 
     QMessageBox::about( this, tr("test"), tr(vector_to_string(res).c_str()));
 }
