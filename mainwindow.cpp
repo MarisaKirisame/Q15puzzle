@@ -4,6 +4,9 @@
 #include "../cpp_common/combinator.hpp"
 #include <chrono>
 #include <QKeyEvent>
+#include <QInputDialog>
+#include <QMessageBox>
+
 using namespace MO;
 auto lambda_all_action = []( const puzzle & p, auto out ) { return all_action( p, out ); };
 auto learner =
@@ -93,4 +96,24 @@ void MainWindow::keyPressEvent(QKeyEvent * ev) {
             break;
         default: break;
     }
+}
+
+void MainWindow::on_pushButton_5_clicked()
+{
+    bool ok;
+    QString str = QInputDialog::getText( this,
+                tr("swap"), tr("enter two values two swap"),
+                QLineEdit::Normal, QString::null, &ok);
+
+    if (ok && !str.isEmpty()) {
+        int x = str.split(" ")[0].toInt();
+        int y = str.split(" ")[1].toInt();
+        p_impl->p = swapTwo(p_impl->p, x, y);
+        repaint();
+    }
+}
+
+void MainWindow::on_pushButton_2_clicked()
+{
+    QMessageBox::about( this, tr("test"), tr(std::to_string(p_impl->mo.table.size()).c_str()));
 }
