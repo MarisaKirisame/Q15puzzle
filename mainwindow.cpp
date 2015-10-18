@@ -3,6 +3,7 @@
 #include "../MO/mo.hpp"
 #include "../cpp_common/combinator.hpp"
 #include <chrono>
+#include <QKeyEvent>
 using namespace MO;
 auto lambda_all_action = []( const puzzle & p, auto out ) { return all_action( p, out ); };
 auto learner =
@@ -70,4 +71,26 @@ void MainWindow::on_pushButton_clicked()
 {
     p_impl->p =  random_puzzle();
     repaint();
+}
+
+void MainWindow::keyPressEvent(QKeyEvent * ev) {
+    switch ( ev->key() ) {
+        case Qt::Key_W :
+            p_impl->p = act(p_impl->p, Action::up);
+            repaint();
+            break;
+        case Qt::Key_S :
+            p_impl->p = act(p_impl->p, Action::down);
+            repaint();
+            break;
+        case Qt::Key_A :
+            p_impl->p = act(p_impl->p, Action::left);
+            repaint();
+            break;
+        case Qt::Key_D :
+            p_impl->p = act(p_impl->p, Action::right);
+            repaint();
+            break;
+        default: break;
+    }
 }
