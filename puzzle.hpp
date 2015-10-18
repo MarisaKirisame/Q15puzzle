@@ -73,5 +73,14 @@ inline puzzle random_puzzle( ) {
     }
     return ret;
 }
+
+inline puzzle swapTwo(const puzzle & p, size_t x, size_t y) {
+    puzzle ret = p;
+    auto temp = ret[x];
+    ret[x] = ret[y];
+    ret[y] = temp;
+    return ret;
+}
+
 #endif // PUZZLE_HPP
 

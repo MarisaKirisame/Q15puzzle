@@ -20,6 +20,7 @@ private slots:
     void on_pushButton_4_clicked();
     void on_pushButton_clicked();
     void keyPressEvent(QKeyEvent *);
+    void on_pushButton_5_clicked();
 
 private:
     Ui::MainWindow *ui;

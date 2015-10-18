@@ -4,6 +4,8 @@
 #include "../cpp_common/combinator.hpp"
 #include <chrono>
 #include <QKeyEvent>
+#include <QInputDialog>
+
 using namespace MO;
 auto iddfs_learner =
         []( const puzzle & state, size_t i, const auto & change_to )
@@ -195,5 +197,20 @@ void MainWindow::keyPressEvent(QKeyEvent * ev) {
             repaint();
             break;
         default: break;
+    }
+}
+
+void MainWindow::on_pushButton_5_clicked()
+{
+    bool ok;
+    QString str = QInputDialog::getText( this,
+                tr("swap"), tr("enter two values two swap"),
+                QLineEdit::Normal, QString::null, &ok);
+
+    if (ok && !str.isEmpty()) {
+        int x = str.split(" ")[0].toInt();
+        int y = str.split(" ")[1].toInt();
+        p_impl->p = swapTwo(p_impl->p, x, y);
+        repaint();
     }
 }
