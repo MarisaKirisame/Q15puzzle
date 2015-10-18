@@ -7,7 +7,7 @@
 #include <chrono>
 #include <cassert>
 typedef std::array< size_t, 16 > puzzle;
-std::random_device & rd( )
+inline std::random_device & rd( )
 {
     static std::random_device rd;
     return rd;
